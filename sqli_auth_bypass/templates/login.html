@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Vulnerable Login – SQLi Auth Bypass{% endblock %}
+
+{% block content %}
+<div class="card danger">
+  <h2><span class="badge vuln">VULNERABLE</span> Login</h2>
+
+  <p style="margin-top: .75rem;">
+    <strong>Root Cause:</strong> User input is concatenated directly into the SQL
+    query using an f-string. An attacker can inject arbitrary SQL to alter the
+    query's logic and bypass authentication entirely.
+  </p>
+
+  <p class="hint" style="margin-top: .5rem;">
+    💡 <strong>Try:</strong> Username = <code>' OR '1'='1' --</code> &nbsp;|&nbsp;
+    Password = <code>anything</code>
+  </p>
+
+  <form method="POST" action="/login" style="margin-top: 1rem;">
+    <label for="username">Username</label>
+    <input type="text" id="username" name="username" placeholder="Enter username" required>
+
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" placeholder="Enter password" required>
+
+    <button type="submit" class="btn btn-danger">Login (Vulnerable)</button>
+  </form>
+
+  {% if query_executed %}
+  <div style="margin-top: 1.25rem;">
+    <label>Query executed:</label>
+    <div class="output">{{ query_executed }}</div>
+  </div>
+  {% endif %}
+
+  {% if user_row %}
+  <div style="margin-top: 1rem;">
+    <label>Returned row:</label>
+    <table>
+      <tr><th>ID</th><th>Username</th><th>Email</th><th>Role</th></tr>
+      <tr>
+        <td>{{ user_row.id }}</td>
+        <td>{{ user_row.username }}</td>
+        <td>{{ user_row.email }}</td>
+        <td>{{ user_row.role }}</td>
+      </tr>
+    </table>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

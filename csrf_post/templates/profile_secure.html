@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Secure Profile – CSRF POST{% endblock %}
+
+{% block content %}
+<div class="card safe">
+  <h2><span class="badge secure">SECURE</span> Edit Profile</h2>
+  <p class="hint">
+    <strong>Mitigation:</strong> This form uses the <em>Synchronizer Token Pattern</em>.
+    A unique CSRF token is embedded in the form and validated on the server before
+    any state-changing action is performed.
+  </p>
+
+  <form method="POST" action="/profile-secure">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+
+    <label for="email">Email Address</label>
+    <input type="email" id="email" name="email" value="{{ user['email'] }}" required>
+
+    <button type="submit" class="btn btn-primary">Update Email (Secure)</button>
+  </form>
+
+  <h3 style="margin-top:1.25rem;">Current User Info</h3>
+  <table>
+    <tr><th>Username</th><td>{{ user['username'] }}</td></tr>
+    <tr><th>Email</th><td>{{ user['email'] }}</td></tr>
+    <tr><th>Role</th><td>{{ user['role'] }}</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h2>Other Mitigations (Theory)</h2>
+  <table>
+    <thead>
+      <tr><th>Technique</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Anti-CSRF Synchronizer Tokens</strong></td>
+        <td>A unique, unpredictable token is included in every state-changing form and validated server-side. <span class="badge secure">Applied here</span></td>
+      </tr>
+      <tr>
+        <td><strong>SameSite Cookies</strong></td>
+        <td>Set <code>SameSite=Lax</code> or <code>Strict</code> on session cookies so the browser doesn't send them with cross-origin requests.</td>
+      </tr>
+      <tr>
+        <td><strong>Re-authentication for Sensitive Actions</strong></td>
+        <td>Require the user to re-enter their password before critical changes (email, password, role).</td>
+      </tr>
+      <tr>
+        <td><strong>Avoid State-changing GET Requests</strong></td>
+        <td>Never use GET for actions that modify data — use POST/PUT/DELETE with proper token validation.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}CSRF – POST-based Forged Action{% endblock %}
+
+{% block content %}
+<div class="card">
+  <h2>CSRF – POST-based Forged Action</h2>
+  <p>
+    The <strong>email-change endpoint</strong> (<code>/profile</code>) accepts POST requests
+    without verifying a CSRF token. An attacker page can auto-submit a hidden form that
+    changes the victim's email — the browser automatically attaches the session cookie,
+    so the server thinks it's a legitimate request.
+  </p>
+</div>
+
+<div class="card">
+  <h2>🧪 Steps to Reproduce</h2>
+  <ol style="padding-left:1.2rem; margin-top:.5rem;">
+    <li>Log in with one of the test accounts below.</li>
+    <li>In a <strong>new tab</strong>, visit the <a href="/evil">🎣 Evil Page</a>.</li>
+    <li>Return to the <a href="/profile">Vulnerable Profile</a> — your email is now <code>hacked@evil.com</code>.</li>
+  </ol>
+</div>
+
+<div class="card">
+  <h2>🔗 Quick Links</h2>
+  <div style="display:flex; gap:.75rem; flex-wrap:wrap; margin-top:.5rem;">
+    <a class="btn btn-primary" href="/login">Login</a>
+    <a class="btn btn-danger" href="/profile">⚠ Vulnerable Profile</a>
+    <a class="btn btn-primary" href="/profile-secure">✓ Secure Profile</a>
+    <a class="btn btn-danger" href="/evil">🎣 Evil Page</a>
+  </div>
+</div>
+
+<div class="card">
+  <h2>🔑 Test Accounts</h2>
+  <table>
+    <thead>
+      <tr><th>Username</th><th>Password</th><th>Role</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>admin</td><td><code>SuperSecret123</code></td><td>admin</td></tr>
+      <tr><td>alice</td><td><code>alice_pass</code></td><td>user</td></tr>
+      <tr><td>bob</td><td><code>bob_pass</code></td><td>user</td></tr>
+    </tbody>
+  </table>
+</div>
+{% endblock %}

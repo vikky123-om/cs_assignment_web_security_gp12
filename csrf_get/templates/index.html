@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}CSRF – GET-based Action Home{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>CSRF – GET-based Forged Action (Account Deletion)</h2>
+  <p style="color:var(--muted); margin-bottom:1rem;">
+    Demonstrates how a state-changing action performed via a simple HTTP GET request can be forged cross-site.
+  </p>
+
+  <p>
+    In this application, an authenticated user's account deletion is performed via an unprotected GET link (<code>/delete-account</code>).
+    Because browsers automatically load and issue GET requests for embedded images, links, or iframes, an attacker website can silently trigger this action using an invisible <code>&lt;img&gt;</code> element.
+  </p>
+
+  <div style="margin-top:1.5rem; display:flex; gap:1rem;">
+    {% if session.get('user') %}
+      <a href="/profile" class="btn btn-primary">Go to Profile</a>
+    {% else %}
+      <a href="/login" class="btn btn-primary">Login to Demo Account</a>
+    {% endif %}
+    <a href="/evil" target="_blank" class="btn btn-danger">Open Attacker Page ↗</a>
+  </div>
+</div>
+
+<div class="card">
+  <h2>👥 Demo User Accounts</h2>
+  <table>
+    <tr><th>Username</th><th>Password</th><th>Balance</th></tr>
+    <tr><td>alice</td><td>alice_pass</td><td>$1000.00</td></tr>
+    <tr><td>bob</td><td>bob_pass</td><td>$1000.00</td></tr>
+    <tr><td>charlie</td><td>charlie_pass</td><td>$1000.00</td></tr>
+  </table>
+  <p class="hint" style="margin-top:.75rem;">If an account gets deleted, click <strong>Reset DB</strong> in the top navigation to restore all accounts.</p>
+</div>
+
+<div class="card danger">
+  <h2>🎣 How the Exploit Works</h2>
+  <ol style="margin-left:1.25rem; line-height:1.8;">
+    <li>Log into the application as <strong>alice</strong> (or any user).</li>
+    <li>View the profile page to confirm the account is active.</li>
+    <li>In a new tab, open the <a href="/evil" target="_blank">Attacker Page</a>.</li>
+    <li>The attacker page contains: <code>&lt;img src="http://127.0.0.1:5004/delete-account" style="display:none"&gt;</code>.</li>
+    <li>The browser sends a GET request to <code>/delete-account</code> along with alice's session cookie.</li>
+    <li>The server processes the request and deletes Alice's account without any consent or interaction!</li>
+  </ol>
+</div>
+{% endblock %}
+

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Vulnerable Ping – In-band CMDi{% endblock %}
+{% block content %}
+<div class="card danger">
+  <h2><span class="badge vuln">VULNERABLE</span> Network Diagnostic Utility (Ping)</h2>
+  <p class="hint" style="margin-top:.5rem;">
+    <strong>Root cause:</strong> User input is concatenated directly into a shell command string passed to <code>os.popen()</code>.
+    The shell interprets metacharacters (<code>;</code>, <code>&amp;&amp;</code>, <code>|</code>), allowing arbitrary commands to run.
+  </p>
+  <p class="hint">
+    <strong>Try payload:</strong> <code>127.0.0.1; whoami</code> or <code>127.0.0.1; id</code>
+  </p>
+
+  <form method="POST">
+    <label for="target">Target Host / IP Address:</label>
+    <input type="text" id="target" name="target" placeholder="e.g. 127.0.0.1; whoami" value="{{ target }}">
+    <button type="submit" class="btn btn-danger">Execute Ping (Vulnerable)</button>
+  </form>
+
+  {% if command %}
+  <h3 style="margin-top:1.25rem;">Command Executed:</h3>
+  <div class="output">{{ command }}</div>
+  {% endif %}
+
+  {% if output %}
+  <h3 style="margin-top:1.25rem;">Command Output (In-band):</h3>
+  <div class="output">{{ output }}</div>
+  {% endif %}
+</div>
+{% endblock %}
+

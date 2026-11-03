@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Secure Login – SQLi Auth Bypass{% endblock %}
+
+{% block content %}
+<div class="card safe">
+  <h2><span class="badge secure">SECURE</span> Login</h2>
+
+  <p style="margin-top: .75rem;">
+    <strong>Mitigation:</strong> This page uses <strong>parameterised queries</strong>
+    (<code>?</code> placeholders). The database driver treats user input strictly as
+    data, never as executable SQL — making injection impossible.
+  </p>
+
+  <form method="POST" action="/login-secure" style="margin-top: 1rem;">
+    <label for="username">Username</label>
+    <input type="text" id="username" name="username" placeholder="Enter username" required>
+
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" placeholder="Enter password" required>
+
+    <button type="submit" class="btn btn-primary">Login (Secure)</button>
+  </form>
+
+  {% if query_executed %}
+  <div style="margin-top: 1.25rem;">
+    <label>Parameterised query:</label>
+    <div class="output">{{ query_executed }}</div>
+    <label style="margin-top: .5rem;">Parameters:</label>
+    <div class="output">{{ query_params }}</div>
+  </div>
+  {% endif %}
+
+  {% if user_row %}
+  <div style="margin-top: 1rem;">
+    <label>Returned row:</label>
+    <table>
+      <tr><th>ID</th><th>Username</th><th>Email</th><th>Role</th></tr>
+      <tr>
+        <td>{{ user_row.id }}</td>
+        <td>{{ user_row.username }}</td>
+        <td>{{ user_row.email }}</td>
+        <td>{{ user_row.role }}</td>
+      </tr>
+    </table>
+  </div>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>🛡️ Other Mitigations (Theory)</h2>
+  <table>
+    <tr>
+      <th>Mitigation</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td><strong>Parameterised Queries</strong> <span class="badge secure">Applied</span></td>
+      <td>Use <code>?</code> placeholders so the database driver separates SQL logic from data. This is the primary and most effective defence against SQL injection.</td>
+    </tr>
+    <tr>
+      <td><strong>Input Validation with Allow-Lists</strong></td>
+      <td>Restrict usernames to expected patterns (e.g., alphanumeric only) using regular expressions. Reject any input containing special SQL characters like <code>'</code>, <code>;</code>, or <code>--</code>.</td>
+    </tr>
+    <tr>
+      <td><strong>Least-Privilege Database Accounts</strong></td>
+      <td>Run the application with a database account that only has the minimum permissions required (e.g., <code>SELECT</code> on the users table). Even if injection succeeds, the attacker cannot <code>DROP</code> tables or read other data.</td>
+    </tr>
+    <tr>
+      <td><strong>Safe Error Handling</strong></td>
+      <td>Never expose raw SQL error messages to the user. Log detailed errors server-side and show a generic "Login failed" message to the client to prevent information leakage.</td>
+    </tr>
+  </table>
+</div>
+{% endblock %}

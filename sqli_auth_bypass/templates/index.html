@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Home – SQLi Auth Bypass{% endblock %}
+
+{% block content %}
+<div class="card">
+  <h2>SQL Injection – Authentication Bypass</h2>
+  <p>
+    This demo illustrates how <strong>SQL Injection</strong> can be used to bypass
+    login authentication. When user input is concatenated directly into a SQL query
+    string, an attacker can manipulate the query logic to log in as any user —
+    or as the first user in the database — without knowing a valid password.
+  </p>
+</div>
+
+<div class="card danger">
+  <h2>💉 Suggested Exploit Payload</h2>
+  <p class="hint">Use this on the <a href="/login" class="vuln">⚠ Vulnerable Login</a> page:</p>
+  <table>
+    <tr><th>Field</th><th>Value</th></tr>
+    <tr><td>Username</td><td><code>' OR '1'='1' --</code></td></tr>
+    <tr><td>Password</td><td><code>anything</code></td></tr>
+  </table>
+  <p style="margin-top: .75rem;">
+    The injected fragment makes the <code>WHERE</code> clause always true and
+    the <code>--</code> comments out the password check, returning the first
+    user in the table (usually <strong>admin</strong>).
+  </p>
+</div>
+
+<div class="card">
+  <h2>🔗 Pages</h2>
+  <table>
+    <tr>
+      <td><a href="/login" class="vuln">⚠ Vulnerable Login</a></td>
+      <td>Uses f-string concatenation — injectable</td>
+    </tr>
+    <tr>
+      <td><a href="/login-secure" class="safe">✓ Secure Login</a></td>
+      <td>Uses parameterised queries — safe</td>
+    </tr>
+  </table>
+</div>
+
+<div class="card">
+  <h2>👥 Test Accounts</h2>
+  <table>
+    <tr><th>Username</th><th>Password</th><th>Role</th></tr>
+    <tr><td>admin</td><td><code>SuperSecret123</code></td><td>admin</td></tr>
+    <tr><td>alice</td><td><code>alice_pass</code></td><td>user</td></tr>
+    <tr><td>bob</td><td><code>bob_pass</code></td><td>user</td></tr>
+    <tr><td>charlie</td><td><code>charlie_pass</code></td><td>user</td></tr>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Profile – CSRF GET Demo{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>User Account Profile</h2>
+  <table>
+    <tr><th>Field</th><th>Value</th></tr>
+    <tr><td>Username</td><td>{{ user['username'] }}</td></tr>
+    <tr><td>Email</td><td>{{ user['email'] }}</td></tr>
+    <tr><td>Account Balance</td><td>${{ "%.2f"|format(user['balance']) }}</td></tr>
+  </table>
+</div>
+
+<div class="card danger">
+  <h2><span class="badge vuln">VULNERABLE</span> Account Deletion via GET</h2>
+  <p class="hint" style="margin-top:.5rem;">
+    <strong>Root cause:</strong> The deletion endpoint is a simple GET request (<code>/delete-account</code>) without any CSRF token.
+    An external website can issue this request using an embedded image tag <code>&lt;img src="..."&gt;</code> without user interaction.
+  </p>
+  <a href="/delete-account" class="btn btn-danger" onclick="return confirm('Delete account via GET?')">Delete Account (Vulnerable GET)</a>
+</div>
+
+<div class="card safe">
+  <h2><span class="badge secure">SECURE</span> Account Deletion via POST + CSRF Token</h2>
+  <p class="hint" style="margin-top:.5rem;">
+    <strong>Mitigation implemented:</strong>
+    <br>1. <strong>Strict HTTP POST method:</strong> GET requests cannot alter server state.
+    <br>2. <strong>Synchronizer CSRF Token:</strong> Form includes a hidden cryptographic token <code>_csrf_token</code> matched against the active session. Cross-site requests cannot guess or read this token.
+  </p>
+
+  <form method="POST" action="/delete-account-secure">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+    <button type="submit" class="btn btn-primary" onclick="return confirm('Delete account securely?')">Delete Account (Secure POST + Token)</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>📖 Other Mitigations (Theory)</h2>
+  <ul style="margin-left:1.25rem; line-height:1.8;">
+    <li><strong>Avoid state-changing GET requests (implemented above):</strong> According to RFC 7231, GET must be safe and idempotent. All state-changing actions (deletions, password resets, transfers) must require POST, PUT, or DELETE.</li>
+    <li><strong>Synchronizer Token Pattern (implemented above):</strong> Issue a cryptographically random, per-session anti-CSRF token in each state-changing form and validate it strictly on the server before mutating state.</li>
+    <li><strong>SameSite cookie attribute:</strong> Setting <code>SameSite=Strict</code> or <code>SameSite=Lax</code> on the session cookie instructs browsers not to attach session cookies to cross-site requests, neutralizing CSRF.</li>
+    <li><strong>Re-authentication for critical actions:</strong> Require the user to re-enter their current password or complete an MFA step before proceeding with high-impact operations like account deletion.</li>
+  </ul>
+</div>
+{% endblock %}
+

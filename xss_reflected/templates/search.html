@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Vulnerable Search – Reflected XSS{% endblock %}
+{% block content %}
+<div class="card danger">
+  <h2><span class="badge vuln">VULNERABLE</span> Product Search</h2>
+  <p class="hint" style="margin-top:.5rem;">
+    <strong>Root cause:</strong> The search query parameter <code>q</code> is rendered directly into the HTML response with Jinja's <code>| safe</code> filter (bypassing auto-escaping).
+    Any HTML or JavaScript injected in <code>q</code> is interpreted as active code by the browser.
+  </p>
+  <p class="hint">
+    <strong>Quick Test Payloads (Click any to test):</strong><br>
+    <a href="/search?q=%3Cimg+src%3Dx+onerror%3D%22alert('Reflected+XSS+Works!')%22%3E" class="btn btn-danger" style="padding:.3rem .7rem; font-size:.8rem; margin:.2rem 0;">Test 1: &lt;img onerror=alert()&gt;</a>
+    <a href="/search?q=%3Ch1+style%3D%22color%3Ared%3Bbackground%3Ayellow%3Bpadding%3A8px%3Bborder-radius%3A6px%22%3E%E2%9A%A0%EF%B8%8F+XSS+DEFACEMENT+SUCCESS%3C%2Fh1%3E" class="btn btn-danger" style="padding:.3rem .7rem; font-size:.8rem; margin:.2rem 0;">Test 2: Visual HTML Injection (Defacement)</a>
+    <a href="/search?q=%3Cscript%3Ealert('Reflected+XSS!')%3C%2Fscript%3E" class="btn btn-danger" style="padding:.3rem .7rem; font-size:.8rem; margin:.2rem 0;">Test 3: &lt;script&gt;alert()&lt;/script&gt;</a>
+  </p>
+
+  <form method="GET" action="/search">
+    <label for="q">Search Product Catalog:</label>
+    <input type="text" id="q" name="q" placeholder="Search keywords..." value="{{ query }}">
+    <button type="submit" class="btn btn-danger">Search (Vulnerable)</button>
+  </form>
+</div>
+
+{% if query %}
+<div class="card">
+  <!-- 
+    ⚠ VULNERABLE CODE PATH:
+    The user-provided query is reflected into the document without encoding using | safe.
+  -->
+  <h3>Search results for: {{ query | safe }}</h3>
+
+  {% if results %}
+    <p style="color:var(--muted); margin-top:.5rem;">Found {{ results|length }} product(s):</p>
+    <table>
+      <tr><th>Product Name</th><th>Category</th><th>Price</th></tr>
+      {% for item in results %}
+      <tr>
+        <td>{{ item.name }}</td>
+        <td>{{ item.category }}</td>
+        <td>${{ "%.2f"|format(item.price) }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p style="color:var(--muted); margin-top:.5rem;">No products found matching your search.</p>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}
+

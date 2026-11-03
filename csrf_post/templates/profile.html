@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Vulnerable Profile – CSRF POST{% endblock %}
+
+{% block content %}
+<div class="card danger">
+  <h2><span class="badge vuln">VULNERABLE</span> Edit Profile</h2>
+  <p class="hint">
+    <strong>Root cause:</strong> This form does <em>not</em> include a CSRF token.
+    Any cross-origin POST request carrying the victim's session cookie will be accepted
+    by the server — the attacker only needs the victim to visit a malicious page.
+  </p>
+
+  <form method="POST" action="/profile">
+    <label for="email">Email Address</label>
+    <input type="email" id="email" name="email" value="{{ user['email'] }}" required>
+
+    <button type="submit" class="btn btn-danger">Update Email (Vulnerable)</button>
+  </form>
+
+  <h3 style="margin-top:1.25rem;">Current User Info</h3>
+  <table>
+    <tr><th>Username</th><td>{{ user['username'] }}</td></tr>
+    <tr><th>Email</th><td>{{ user['email'] }}</td></tr>
+    <tr><th>Role</th><td>{{ user['role'] }}</td></tr>
+  </table>
+
+  <p class="hint" style="margin-top:1rem;">
+    💡 Try visiting the <a href="/evil">🎣 Attacker Page</a> in another tab while logged in!
+  </p>
+</div>
+{% endblock %}

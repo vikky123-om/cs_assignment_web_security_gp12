@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Secure Search – Reflected XSS Mitigated{% endblock %}
+{% block content %}
+<div class="card safe">
+  <h2><span class="badge secure">SECURE</span> Product Search</h2>
+  <p class="hint" style="margin-top:.5rem;">
+    <strong>Mitigation implemented: Context-aware Output Encoding.</strong>
+    The input parameter is encoded with <code>html.escape()</code> on the server side and rendered without the bypass filter.
+    Characters such as <code>&lt;</code>, <code>&gt;</code>, <code>&amp;</code>, <code>"</code>, and <code>'</code> are converted to their corresponding safe HTML entities (e.g. <code>&amp;lt;script&amp;gt;</code>).
+    The browser displays the payload as pure text rather than executing it as executable JavaScript.
+  </p>
+  <p class="hint">
+    <strong>Test Same Payloads on Secure Endpoint:</strong><br>
+    <a href="/search-secure?q=%3Cimg+src%3Dx+onerror%3D%22alert('Reflected+XSS+Works!')%22%3E" class="btn btn-primary" style="padding:.3rem .7rem; font-size:.8rem; margin:.2rem 0;">Test 1 on Secure (Blocked)</a>
+    <a href="/search-secure?q=%3Ch1+style%3D%22color%3Ared%3Bbackground%3Ayellow%3Bpadding%3A8px%3Bborder-radius%3A6px%22%3E%E2%9A%A0%EF%B8%8F+XSS+DEFACEMENT+SUCCESS%3C%2Fh1%3E" class="btn btn-primary" style="padding:.3rem .7rem; font-size:.8rem; margin:.2rem 0;">Test 2 on Secure (Blocked)</a>
+  </p>
+
+  <form method="GET" action="/search-secure">
+    <label for="q">Search Product Catalog:</label>
+    <input type="text" id="q" name="q" placeholder="Search keywords..." value="{{ raw_query }}">
+    <button type="submit" class="btn btn-primary">Search (Secure)</button>
+  </form>
+</div>
+
+{% if query %}
+<div class="card">
+  <!-- 
+    ✅ MITIGATED CODE PATH:
+    Output is properly encoded into HTML entities and rendered without | safe.
+  -->
+  <h3>Search results for: {{ query }}</h3>
+
+  {% if results %}
+    <p style="color:var(--muted); margin-top:.5rem;">Found {{ results|length }} product(s):</p>
+    <table>
+      <tr><th>Product Name</th><th>Category</th><th>Price</th></tr>
+      {% for item in results %}
+      <tr>
+        <td>{{ item.name }}</td>
+        <td>{{ item.category }}</td>
+        <td>${{ "%.2f"|format(item.price) }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p style="color:var(--muted); margin-top:.5rem;">No products found matching your search.</p>
+  {% endif %}
+</div>
+{% endif %}
+
+<div class="card" style="margin-top:1.5rem;">
+  <h2>📖 Other Mitigations (Theory)</h2>
+  <ul style="margin-left:1.25rem; line-height:1.8;">
+    <li><strong>Context-aware Output Encoding (applied above):</strong> Encode all user input before injecting it into the DOM. The encoding must match the context: HTML body (<code>&amp;lt;</code>), HTML attributes, JavaScript context, or URI component.</li>
+    <li><strong>Framework Auto-Escaping:</strong> Utilize modern web templating engines (Jinja2, React, Angular) that auto-escape interpolated expressions by default. Never bypass auto-escaping with insecure directives such as <code>| safe</code> or <code>dangerouslySetInnerHTML</code>.</li>
+    <li><strong>HTML Sanitiser for Rich Text:</strong> If rich HTML input is permitted (e.g., Markdown or WYSIWYG editors), process input with a strict allow-list sanitiser like Bleach or DOMPurify to strip dangerous elements (<code>&lt;script&gt;</code>, <code>&lt;iframe&gt;</code>, <code>onerror=</code>).</li>
+    <li><strong>Content Security Policy (CSP):</strong> Deploy a restrictive HTTP response header like <code>Content-Security-Policy: default-src 'self'; script-src 'self'</code>. This prevents the execution of inline scripts and unauthorized external scripts even if an injection flaw exists.</li>
+    <li><strong>HttpOnly Session Cookies:</strong> Protect session identifiers by setting the <code>HttpOnly</code> flag. Even if malicious JavaScript is executed via XSS, the browser blocks access to <code>document.cookie</code>, preventing session hijacking.</li>
+    <li><strong>Safe DOM Sinks:</strong> When updating client-side UI via JavaScript, prefer safe APIs like <code>element.textContent</code> or <code>element.setAttribute()</code> instead of vulnerable sinks like <code>element.innerHTML</code> or <code>document.write()</code>.</li>
+  </ul>
+</div>
+{% endblock %}
+

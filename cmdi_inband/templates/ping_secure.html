@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Secure Ping – Mitigated CMDi{% endblock %}
+{% block content %}
+<div class="card safe">
+  <h2><span class="badge secure">SECURE</span> Network Diagnostic Utility (Ping)</h2>
+  <p class="hint" style="margin-top:.5rem;">
+    <strong>Mitigation implemented:</strong>
+    <br>1. <strong>Allow-list input validation:</strong> Input must strictly match <code>^[a-zA-Z0-9.\-]+$</code>, rejecting all shell metacharacters (<code>;</code>, <code>|</code>, <code>&amp;</code>, <code>`</code>, <code>$</code>).
+    <br>2. <strong>Avoid shell execution (Argument Vector):</strong> Uses <code>subprocess.run(["ping", "-c", "2", target], shell=False)</code>, ensuring arguments are directly passed to the executable without shell interpolation.
+  </p>
+  <p class="hint">
+    <strong>Test exploit:</strong> Try entering <code>127.0.0.1; whoami</code> — it is immediately blocked and rejected!
+  </p>
+
+  <form method="POST">
+    <label for="target">Target Host / IP Address:</label>
+    <input type="text" id="target" name="target" placeholder="e.g. 127.0.0.1" value="{{ target }}">
+    <button type="submit" class="btn btn-primary">Execute Ping (Secure)</button>
+  </form>
+
+  {% if command %}
+  <h3 style="margin-top:1.25rem;">Command Executed:</h3>
+  <div class="output">{{ command }}</div>
+  {% endif %}
+
+  {% if output %}
+  <h3 style="margin-top:1.25rem;">Command Output:</h3>
+  <div class="output">{{ output }}</div>
+  {% endif %}
+</div>
+
+<div class="card" style="margin-top:1.5rem;">
+  <h2>📖 Other Mitigations (Theory)</h2>
+  <ul style="margin-left:1.25rem; line-height:1.8;">
+    <li><strong>Avoid the shell entirely:</strong> Use language-native APIs (such as Python's <code>socket</code> library or dedicated ping packages) rather than calling OS binaries.</li>
+    <li><strong>Parameterised execution with argument vector:</strong> When OS commands must be invoked, pass arguments as discrete array elements (e.g., <code>subprocess.run(['cmd', arg], shell=False)</code>) so arguments are not interpreted as commands by a shell.</li>
+    <li><strong>Allow-list input validation:</strong> Whitelist only acceptable characters (e.g. alphanumeric characters, dots, and hyphens for domain/IP names). Reject or strip anything else.</li>
+    <li><strong>Least privilege:</strong> Run the web server process under a low-privilege user account with minimal file system access and restricted execution privileges (e.g., using chroot/containers/AppArmor).</li>
+  </ul>
+</div>
+{% endblock %}
+

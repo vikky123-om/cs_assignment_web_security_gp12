@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}CMDi – In-band Home{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>OS Command Injection – In-band (Output Returned)</h2>
+  <p style="color:var(--muted); margin-bottom:1rem;">
+    Demonstrates OS command injection where the system command output is directly returned in the HTTP response.
+  </p>
+
+  <p>
+    The server provides a "Network Diagnostic Utility" that executes the system <code>ping</code> utility to test connectivity to an IP or domain.
+  </p>
+
+  <div style="display:flex; gap:1rem; margin-top:1.5rem;">
+    <a href="/ping" class="btn btn-danger">⚠ Vulnerable Ping</a>
+    <a href="/ping-secure" class="btn btn-primary">✓ Secure Ping</a>
+  </div>
+</div>
+
+<div class="card danger">
+  <h2>🎯 Exploit Payloads to Try</h2>
+  <p class="hint">The vulnerable endpoint uses <code>os.popen(f"ping -c 2 {target}")</code>, allowing command chaining via shell metacharacters.</p>
+  <ul>
+    <li><code>127.0.0.1; whoami</code> — Execute <code>whoami</code> after the ping finishes</li>
+    <li><code>127.0.0.1; id</code> — View user ID and group permissions</li>
+    <li><code>127.0.0.1; uname -a</code> — View operating system details</li>
+    <li><code>127.0.0.1 && cat /etc/passwd</code> — Read file contents</li>
+  </ul>
+</div>
+{% endblock %}
+

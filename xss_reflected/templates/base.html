@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}XSS – Reflected{% endblock %}</title>
+  <style>
+    :root {
+      --bg: #0f1117; --card: #1a1d28; --border: #2a2d3a;
+      --accent: #6c63ff; --accent-hover: #5a52e0;
+      --danger: #e74c3c; --success: #2ecc71; --warn: #f39c12;
+      --text: #e0e0e0; --muted: #8a8fa8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { background: var(--card); border-bottom: 1px solid var(--border); padding: .75rem 2rem; display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+    nav .brand { font-weight: 700; font-size: 1.1rem; color: var(--accent); }
+    nav .links { display: flex; gap: 1rem; }
+    nav .links a { padding: .35rem .75rem; border-radius: 6px; font-size: .85rem; }
+    nav .links a:hover { background: var(--border); text-decoration: none; }
+    nav .links a.vuln { color: var(--danger); }
+    nav .links a.safe { color: var(--success); }
+    nav .right { margin-left: auto; font-size: .85rem; }
+    .container { max-width: 900px; margin: 2rem auto; padding: 0 1.5rem; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .card h2 { margin-bottom: .5rem; }
+    .card.danger { border-left: 4px solid var(--danger); }
+    .card.safe { border-left: 4px solid var(--success); }
+    label { display: block; margin-bottom: .25rem; font-weight: 600; font-size: .9rem; }
+    input[type="text"], input[type="password"], input[type="email"], textarea {
+      width: 100%; padding: .6rem .8rem; border: 1px solid var(--border); border-radius: 6px;
+      background: var(--bg); color: var(--text); font-size: .95rem; margin-bottom: .75rem;
+    }
+    button, .btn { display: inline-block; padding: .6rem 1.4rem; border: none; border-radius: 6px; cursor: pointer; font-size: .9rem; font-weight: 600; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-danger:hover { background: #c0392b; }
+    .flash { padding: .75rem 1rem; border-radius: 6px; margin-bottom: 1rem; font-size: .9rem; }
+    .flash.success { background: #1a3a2a; border: 1px solid var(--success); }
+    .flash.danger { background: #3a1a1a; border: 1px solid var(--danger); }
+    .flash.warning { background: #3a2a1a; border: 1px solid var(--warn); }
+    .flash.info { background: #1a2a3a; border: 1px solid #3498db; }
+    pre, code { font-family: 'Fira Code', 'Consolas', monospace; font-size: .85rem; }
+    .output { background: #0d0f14; border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin-top: .75rem; white-space: pre-wrap; word-wrap: break-word; max-height: 400px; overflow-y: auto; }
+    .badge { display: inline-block; padding: .15rem .5rem; border-radius: 4px; font-size: .75rem; font-weight: 700; text-transform: uppercase; }
+    .badge.vuln { background: var(--danger); color: #fff; }
+    .badge.secure { background: var(--success); color: #fff; }
+    table { width: 100%; border-collapse: collapse; margin-top: .75rem; }
+    th, td { padding: .6rem .8rem; text-align: left; border-bottom: 1px solid var(--border); }
+    th { color: var(--muted); font-size: .8rem; text-transform: uppercase; }
+    .entry { padding: .75rem; border: 1px solid var(--border); border-radius: 6px; margin-bottom: .5rem; background: var(--bg); }
+    .entry .meta { font-size: .8rem; color: var(--muted); }
+    .hint { font-size: .85rem; color: var(--muted); margin-bottom: .75rem; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <span class="brand">🔒 XSS – Reflected</span>
+  <div class="links">
+    <a href="/">Home</a>
+    <a href="/search" class="vuln">Search (Vulnerable) ⚠</a>
+    <a href="/search-secure" class="safe">Search (Secure) ✓</a>
+  </div>
+</nav>
+
+<div class="container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="flash {{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</div>
+
+</body>
+</html>
+
